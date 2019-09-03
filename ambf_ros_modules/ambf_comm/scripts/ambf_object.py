@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-#!/usr/bin/env python
+    #!/usr/bin/env python
+# !/usr/bin/env python
 # //==============================================================================
 # /*
 #     Software License Agreement (BSD License)
@@ -37,6 +37,13 @@
 #     ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #     POSSIBILITY OF SUCH DAMAGE.
 
+from collections import deque
+
+import numpy as np
+import rospy
+from ambf_msgs.msg import ObjectCmd
+from ambf_msgs.msg import ObjectState
+from geometry_msgs.msg import Pose, Wrench
 #     \author    <http://www.aimlab.wpi.edu>
 #     \author    <amunawar@wpi.edu>
 #     \author    Adnan Munawar
@@ -44,11 +51,7 @@
 # */
 # //==============================================================================
 from tf import transformations
-from ambf_msgs.msg import ObjectState
-from ambf_msgs.msg import ObjectCmd
 from watch_dog import WatchDog
-import rospy
-from geometry_msgs.msg import Pose, Wrench
 
 
 class Object(WatchDog):
@@ -57,16 +60,21 @@ class Object(WatchDog):
         Constructor
         :param a_name:
         """
-        super(Object, self).__init__(time_out=0.1) # Set duration of Watchdog expiry
+        super(Object, self).__init__(time_out=0.1)  # Set duration of Watchdog expiry
         self._name = ''
         self._state = ObjectState()
         self._cmd = ObjectCmd()
         self._pub = None
         self._sub = None
         self.pub_flag = True
+        self._start_flag = False
         self._active = False
         self._pose_cmd_set = False  # Flag to check if a Pose command has been set from the Object
         self._wrench_cmd_set = False  # Flag to check if a Wrench command has been set from the Object
+        self._joint_velocity = None
+        self._dt = 0.0
+        self._velocity_window_size = 4
+        self._vel_smoother = deque([], self._velocity_window_size)
 
     def ros_cb(self, data):
         """
@@ -74,7 +82,20 @@ class Object(WatchDog):
         :param data:
         :return:
         """
+        if not self._start_flag:
+            last_joints_state = data.joint_positions
+            last_joints_vel = tuple([0.0]*len(self._state.joint_positions))
+            last_time = 0.000000001
+        else:
+            last_joints_state = self._state.joint_positions
+            last_joints_vel = tuple(self.get_all_joint_vel())
+            last_time = self.get_wall_time()
+
         self._state = data
+
+        self._calc_dt(last_time)
+        self._calc_joint_velocity(last_joints_state)
+        self._start_flag = True
 
     def is_active(self):
         """
@@ -89,6 +110,19 @@ class Object(WatchDog):
         :return:
         """
         return self._state.sim_step
+
+    def get_wall_time(self):
+        """
+        get the wall time
+        """
+        return self._state.wall_time
+
+    def get_dt(self):
+        """
+        Gets the time delta
+        :return: delta time
+        """
+        return self._dt
 
     def get_joint_pos(self, idx):
         """
@@ -115,6 +149,34 @@ class Object(WatchDog):
         joints = []
         for idx in xrange(n_jnts):
             joints.append(self._state.joint_positions[idx])
+
+        return joints
+
+    def get_joint_vel(self, idx):
+        """
+        Get the joint position of a specific joint at idx. Check joint names to see indexes
+        :param idx:
+        :return:
+        """
+        n_jnts = len(self._state.joint_positions)
+
+        if not 0 <= idx < n_jnts:
+            # Index invalid
+            print 'Joint Index %s should be between 0-%s'.format(idx, n_jnts)
+            return
+
+        return self._joint_velocity[idx]
+
+    def get_all_joint_vel(self):
+        """
+                Get the joint position of a specific joint at idx. Check joint names to see indexes
+                :param idx:
+                :return:
+                """
+        n_jnts = len(self._state.joint_positions)
+        joints = []
+        for idx in xrange(n_jnts):
+            joints.append(self._joint_velocity[idx])
 
         return joints
 
@@ -313,10 +375,10 @@ class Object(WatchDog):
         """
 
         if isinstance(joint, basestring):
-            
+
             joint_names = self._state.joint_names
             if joint not in joint_names:
-                print joint +  " is not a joint"
+                print joint + " is not a joint"
             idx = joint_names.index(joint)
         else:
             idx = joint
@@ -336,7 +398,6 @@ class Object(WatchDog):
         self._cmd.position_controller_mask[idx] = True
 
         self._apply_command()
-
 
     def set_force(self, fx, fy, fz):
         """
@@ -380,10 +441,10 @@ class Object(WatchDog):
         """
 
         if isinstance(joint, basestring):
-            
+
             joint_names = self._state.joint_names
             if joint not in joint_names:
-                print joint +  " is not a joint"
+                print joint + " is not a joint"
                 return
             idx = joint_names.index(joint)
         else:
@@ -405,6 +466,27 @@ class Object(WatchDog):
 
         self._apply_command()
 
+    def set_all_joint_effort(self, efforts):
+
+
+        n_jnts = len(self._state.joint_positions)
+
+        
+        if n_jnts > len(efforts) or n_jnts < len(efforts):
+            print "Not correct amoutn efforts"
+            return
+        else:
+            self._cmd.joint_cmds = efforts
+
+        if len(self._cmd.joint_cmds) != n_jnts:
+            self._cmd.joint_cmds = [0.0] * n_jnts
+            self._cmd.position_controller_mask = [0] * n_jnts
+
+        self._cmd.position_controller_mask = [0]*n_jnts
+    
+        self._apply_command()
+
+
     def set_wrench(self, wrench):
         """
         Set the wrench for this object in the parent frame
@@ -416,6 +498,7 @@ class Object(WatchDog):
 
         self._apply_command()
         self._wrench_cmd_set = True
+
 
     def pose_command(self, px, py, pz, roll, pitch, yaw, *jnt_cmds):
         """
@@ -444,17 +527,21 @@ class Object(WatchDog):
         self._apply_command()
         self._pose_cmd_set
 
+
     def set_force(self, fx, fy, fz):
+        self._cmd.enable_position_controller = False
         nx = self._cmd.wrench.torque.x
         ny = self._cmd.wrench.torque.y
         nz = self._cmd.wrench.torque.z
         self.wrench_command(fx, fy, fz, nx, ny, nz)
+
 
     def set_torque(self, nx, ny, nz):
         fx = self._cmd.wrench.force.x
         fy = self._cmd.wrench.force.y
         fz = self._cmd.wrench.force.z
         self.wrench_command(fx, fy, fz, nx, ny, nz)
+
 
     def wrench_command(self, fx, fy, fz, nx, ny, nz):
         """
@@ -478,6 +565,7 @@ class Object(WatchDog):
         self._apply_command()
         self._wrench_cmd_set = True
 
+
     def _apply_command(self):
         """
         Internal function to synchronized with the publisher and update watchdog
@@ -486,6 +574,29 @@ class Object(WatchDog):
         self._cmd.header.stamp = rospy.Time.now()
         self._pub.publish(self._cmd)
         self.acknowledge_wd()
+
+
+    def _calc_joint_velocity(self, last_joints_state):
+        """
+        calculates the joint vel
+        :param last_joints_state: last joint state
+        :return: None
+        """
+        vel = tuple(np.subtract(self._state.joint_positions, last_joints_state) / self.get_dt())
+        self._vel_smoother.append(vel)
+        self._joint_velocity = np.sum(self._vel_smoother, 0) / len(self._vel_smoother)
+
+    def _calc_dt(self, last_time):
+        """
+        calculates the dt
+        :param last_time: prevous time
+        :return:
+        """
+        if self.get_wall_time() - last_time == 0:
+            pass
+        else:
+            self._dt = self.get_wall_time() - last_time
+
 
     def _clear_command(self):
         """
@@ -499,6 +610,7 @@ class Object(WatchDog):
         self._cmd.wrench.torque.y = 0
         self._cmd.wrench.torque.z = 0
 
+
     def run_publisher(self):
         """
         Run the publisher in a thread
@@ -509,4 +621,3 @@ class Object(WatchDog):
                 # self.console_print(self._name)
                 self._clear_command()
             self._pub.publish(self._cmd)
-
