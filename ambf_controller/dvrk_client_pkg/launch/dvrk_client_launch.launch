@@ -1,0 +1,5 @@
+<launch>
+    <!-- My Package launch file -->
+    <node pkg="dvrk_client_pkg" type="ambf_client" name="ambf_client_node"  output="screen">
+    </node>
+</launch>
