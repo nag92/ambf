@@ -72,6 +72,8 @@ class Client:
         self._ros_topics = rospy.get_published_topics()
         # Find the common longest substring to make the object names shorter
         first_run = True
+
+        print('num of ros topics', len(self._ros_topics))
         for i in range(len(self._ros_topics)):
             topic_name = self._ros_topics[i][0]
             msg_type = self._ros_topics[i][1]
@@ -80,14 +82,18 @@ class Client:
                     first_run = False
                     self._common_obj_namespace = topic_name
                 else:
+                    print('self._common_obj_namespace', self._common_obj_namespace)
+                    print('topic_name', topic_name)
                     seq_match = SequenceMatcher(None, self._common_obj_namespace, topic_name)
                     match = seq_match.find_longest_match(0, len(self._common_obj_namespace), 0, len(topic_name))
                     if match.size != 0 and match.a == 0:
                         self._common_obj_namespace = self._common_obj_namespace[match.a: match.a + match.size]
+                        print('self._common_obj_namespace: ', self._common_obj_namespace)
                     else:
                         print('No common object namespace found, aborting search')
                         self._common_obj_namespace = ''
                         break
+            print('-------------------------------')
         print('Found Common Object Namespace as: ', self._common_obj_namespace)
 
         for i in range(len(self._ros_topics)):

@@ -9,23 +9,35 @@
 #include<ambf_msgs/ObjectState.h>
 #include<ambf_msgs/WorldCmd.h>
 #include<ambf_msgs/WorldState.h>
+//#include <boost/filesystem.hpp>
+//#include<boost/algorithm/algorithm.hpp>
+//#include<boost/algorithm/string.hpp>
 
 using namespace std;
 
 class Client
 {
 private:
-    vector<string> ros_topics_;
+    ros::master::V_TopicInfo ros_topics_;
     vector<string> sub_list_;
     map<string, string> objects_dict_;
-    float rate_ = 0;
+    float rate_ = 1000;
     string world_name_ = "";
     string common_obj_namespace_ = "";
     string client_name_ = "";
-    string world_handle_ = NULL;
-    ros::master::V_TopicInfo topic_infos_;
+    string world_handle_ = "";
+//    ros::master::V_TopicInfo topic_infos_;
 
+    vector<string> lv_elems_;
+//    char lc_delim_[2];
+    ros::Subscriber sub_;
+
+
+    bool getPublishedTopics();
     void create_objs_from_rostopics();
+
+    void MyCallBack(const ambf_msgs::ObjectState::ConstPtr& msg);
+
     void connect();
     void refresh();
     void start();
@@ -42,10 +54,10 @@ private:
     void print_summary();
     void clean_up();
 
-//https://answers.ros.org/question/206893/getting-list-of-published-topics-from-within-c-code/
+
 public:
     Client(ros::NodeHandle *nh);
-
+    ~Client(void);
 };
 
 #endif // AMBF_CLIENT_H

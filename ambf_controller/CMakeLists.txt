@@ -43,7 +43,8 @@ find_package (GLFW REQUIRED)
 find_package (Boost COMPONENTS program_options filesystem REQUIRED)
 
 include_directories (${GLFW_INCLUDE_DIRS}
-                     raven2/include )
+                     raven2/include
+                     dvrk/include )
 
 add_executable (ambf_controller raven2/include/ambf_defines.h
                                 raven2/include/ambf_controller.h
@@ -53,6 +54,22 @@ add_executable (ambf_controller raven2/include/ambf_defines.h
                                 raven2/src/ambf_defines.cpp
                                 raven2/src/main.cpp )
 
-target_link_libraries (ambf_controller ${AMBF_LIBRARIES} ${GLFW_LIBRARIES} ${Boost_LIBRARIES})
+add_executable (ambf_client     dvrk/include/ros_com_base.h
+                                dvrk/include/ambf_client.h
+                                dvrk/include/ambf_object.h
+                                dvrk/include/object_ros_com.h
+                                dvrk/include/ambf_world.h
+                                dvrk/include/watch_dog.h
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dvrk_client_pkg)
+                                dvrk/src/ros_com_base.cpp
+                                dvrk/src/ambf_client.cpp
+                                dvrk/src/ambf_object.cpp
+                                dvrk/src/object_ros_com.cpp
+                                dvrk/src/ambf_world.cpp
+#                                dvrk/src/watch_dog.cpp
+                                dvrk/src/main.cpp )
+
+
+
+target_link_libraries (ambf_controller ${AMBF_LIBRARIES} ${GLFW_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries (ambf_client ${AMBF_LIBRARIES} ${GLFW_LIBRARIES} ${Boost_LIBRARIES})
