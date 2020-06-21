@@ -9,9 +9,9 @@
 #include<ambf_msgs/ObjectState.h>
 #include<ambf_msgs/WorldCmd.h>
 #include<ambf_msgs/WorldState.h>
-//#include <boost/filesystem.hpp>
-//#include<boost/algorithm/algorithm.hpp>
-//#include<boost/algorithm/string.hpp>
+
+#include "ambf_world.h"
+#include "ambf_object.h"
 
 using namespace std;
 
@@ -41,6 +41,7 @@ private:
     void connect();
     void refresh();
     void start();
+
     void get_common_namespace();
     void get_world_handle();
     void get_obj_names();
@@ -56,7 +57,8 @@ private:
 
 
 public:
-    Client(ros::NodeHandle *nh);
+//    Client(ros::NodeHandle *nh);
+    Client();
     ~Client(void);
 };
 

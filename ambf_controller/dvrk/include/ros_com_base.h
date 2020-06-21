@@ -19,7 +19,7 @@ public:
 
         int argc = 0;
         char **argv = 0;
-        ros::init(argc, argv, "ambf_comm_node");
+        ros::init(argc, argv, "ambf_client");
         nodePtr.reset(new ros::NodeHandle);
         aspinPtr.reset(new ros::AsyncSpinner(1));
         nodePtr->setCallbackQueue(&m_custom_queue);

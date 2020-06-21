@@ -55,16 +55,25 @@ add_executable (ambf_controller raven2/include/ambf_defines.h
                                 raven2/src/main.cpp )
 
 add_executable (ambf_client     dvrk/include/ros_com_base.h
+
                                 dvrk/include/ambf_client.h
                                 dvrk/include/ambf_object.h
+
                                 dvrk/include/object_ros_com.h
+                                dvrk/include/world_ros_com.h
+
                                 dvrk/include/ambf_world.h
                                 dvrk/include/watch_dog.h
 
+
                                 dvrk/src/ros_com_base.cpp
+
                                 dvrk/src/ambf_client.cpp
                                 dvrk/src/ambf_object.cpp
+
                                 dvrk/src/object_ros_com.cpp
+                                dvrk/src/world_ros_com.cpp
+
                                 dvrk/src/ambf_world.cpp
 #                                dvrk/src/watch_dog.cpp
                                 dvrk/src/main.cpp )

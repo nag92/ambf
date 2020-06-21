@@ -1,8 +1,23 @@
 #include "ambf_client.h"
 
-Client::Client(ros::NodeHandle *nh)
+//Client::Client(ros::NodeHandle *nh)
+Client::Client()
 {
+
     this->create_objs_from_rostopics();
+
+    std::string a_name_world = "/World/";
+//    std::string a_name_object = "/World/";
+
+    std::string a_namespace = "/ambf/env/";
+    int a_freq_min = 50;
+    int a_freq_max = 100;
+    double time_out = 10.0;
+
+    WorldRosComClient wc1(a_name_world, a_namespace, a_freq_min, a_freq_max, time_out);
+//    Ob(a_name, a_namespace, a_freq_min, a_freq_max, time_out);
+    sleep(10000);
+
 
 //    ros::master::getTopics(topic_infos_);
 //    ROS_INFO("%lu", topic_infos_.size());
@@ -33,19 +48,24 @@ void Client::create_objs_from_rostopics()
 {
     this->getPublishedTopics();
 
-    common_obj_namespace_ = "/ambf/env/"; //This needs to be fixed, should not be hardcoded
-    world_name_ = "World";
+//    common_obj_namespace_ = "/ambf/env/"; //This needs to be fixed, should not be hardcoded
+//    world_name_ = "World";
     for(int i = 0; i < ros_topics_.size(); i++)
     {
         string topic_name = ros_topics_[i].name;
         string msg_type = ros_topics_[i].datatype;
 
-//        ROS_INFO("%s: %s", topic_name.c_str(), msg_type .c_str());
+        ROS_INFO("%s: %s", topic_name.c_str(), msg_type .c_str());
 
-        if(msg_type == "ambf_msgs/ObjectState") {
+//        if(msg_type == "ambf_msgs/ObjectState") {
 
-        }
+//        }
     }
+
+
+
+
+
 
 }
 
@@ -85,22 +105,4 @@ bool Client::getPublishedTopics(){
 
 Client::~Client(void){}
 
-///**
-// * @brief      the Main function
-// *
-// * @param[in]  argc  The argc
-// * @param      argv  The argv
-// *
-// * @return     success
-// */
-//int main(int argc, char* argv[])
-//{
-//    string client_node = "ambf_client";
 
-//    ros::init(argc, argv, client_node);
-//    ros::NodeHandle nh;
-//    Client client(&nh);
-
-//    ros::spin();
-//    return 0;
-//}

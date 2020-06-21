@@ -90,7 +90,7 @@ _client.connect()
 #    mtm_wrist_handle.set_torque(0, 3, 0) # Set 10 Nm in the World Y axis
 #    time.sleep(0.01) # Run the loop for 10 seconds
 
-#print('\n\n----')
-#input("Let's clean up. Press Enter to continue...")
+print('\n\n----')
+input("Let's clean up. Press Enter to continue...")
 ## Lastly to cleanup
-#_client.clean_up()
+_client.clean_up()
