@@ -6,7 +6,8 @@
 #include "ambf_msgs/WorldCmd.h"
 
 
-class WorldRosComClient: public RosComBaseClient<ambf_msgs::WorldState, ambf_msgs::WorldCmd>{
+//class WorldRosComClient: public RosComBaseClient<ambf_msgs::WorldState, ambf_msgs::WorldCmd>{
+class WorldRosComClient: public RosComBaseClient<ambf_msgs::WorldCmd, ambf_msgs::WorldState>{
 public:
     WorldRosComClient(std::string a_name, std::string a_namespace, int a_freq_min, int a_freq_max, double time_out);
     ~WorldRosComClient();
@@ -19,6 +20,7 @@ protected:
     int m_skip_steps_ctr;
     virtual void reset_cmd();
     void sub_cb(ambf_msgs::WorldCmdConstPtr msg);
+
 };
 
 #endif // WORLD_ROS_COM_H

@@ -36,7 +36,7 @@ private:
     bool getPublishedTopics();
     void create_objs_from_rostopics();
 
-    void MyCallBack(const ambf_msgs::ObjectState::ConstPtr& msg);
+//    void MyCallBack(const ambf_msgs::ObjectState::ConstPtr& msg);
 
     void connect();
     void refresh();

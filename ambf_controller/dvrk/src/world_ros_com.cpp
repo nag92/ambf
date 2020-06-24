@@ -9,8 +9,11 @@ void WorldRosComClient::init(){
     m_enableSimThrottle = false;
     m_stepSim = true;
 
-    m_pub = nodePtr->advertise<ambf_msgs::WorldState>("/" + m_namespace + "/" + m_name + "/State", 10);
-    m_sub = nodePtr->subscribe("/" + m_namespace + "/" + m_name + "/Command", 10, &WorldRosComClient::sub_cb, this);
+//    m_pub = nodePtr->advertise<ambf_msgs::WorldState>("/" + m_namespace + "/" + m_name + "/State", 10);
+//    m_sub = nodePtr->subscribe("/" + m_namespace + "/" + m_name + "/Command", 10, &WorldRosComClient::sub_cb, this);
+
+    m_pub = nodePtr->advertise<ambf_msgs::WorldCmd>("/" + m_namespace + "/" + m_name + "/Command", 10);
+    m_sub = nodePtr->subscribe("/" + m_namespace + "/" + m_name + "/State", 10, &WorldRosComClient::sub_cb, this);
 
     m_thread = boost::thread(boost::bind(&WorldRosComClient::run_publishers, this));
     std::cerr << "Thread Joined: " << m_name << std::endl;

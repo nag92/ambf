@@ -6,17 +6,6 @@ Client::Client()
 
     this->create_objs_from_rostopics();
 
-    std::string a_name_world = "/World/";
-//    std::string a_name_object = "/World/";
-
-    std::string a_namespace = "/ambf/env/";
-    int a_freq_min = 50;
-    int a_freq_max = 100;
-    double time_out = 10.0;
-
-    WorldRosComClient wc1(a_name_world, a_namespace, a_freq_min, a_freq_max, time_out);
-//    Ob(a_name, a_namespace, a_freq_min, a_freq_max, time_out);
-    sleep(10000);
 
 
 //    ros::master::getTopics(topic_infos_);
@@ -48,8 +37,8 @@ void Client::create_objs_from_rostopics()
 {
     this->getPublishedTopics();
 
-//    common_obj_namespace_ = "/ambf/env/"; //This needs to be fixed, should not be hardcoded
-//    world_name_ = "World";
+
+
     for(int i = 0; i < ros_topics_.size(); i++)
     {
         string topic_name = ros_topics_[i].name;
@@ -62,6 +51,24 @@ void Client::create_objs_from_rostopics()
 //        }
     }
 
+    //    common_obj_namespace_ = "/ambf/env/"; //This needs to be fixed, should not be hardcoded
+    //    world_name_ = "World";
+        std::string a_name_world = "/World/";
+        std::string a_name_object = "/Object/";
+        std::string a_name_psm_base = "/psm/baselink/";
+    //    std::string a_name_object = "/World/";
+
+        std::string a_namespace = "/ambf/env/";
+        int a_freq_min = 50;
+        int a_freq_max = 100;
+        double time_out = 10.0;
+
+        WorldRosComClient wrc1(a_name_world, a_namespace, a_freq_min, a_freq_max, time_out);
+
+        ObjectRosComClient orc1(a_name_object, a_namespace, a_freq_min, a_freq_max, time_out);
+        ObjectRosComClient occb(a_name_psm_base, a_namespace, a_freq_min, a_freq_max, time_out);
+
+        sleep(10000);
 
 
 
@@ -79,9 +86,9 @@ bool Client::getPublishedTopics(){
     }
 
     ros_topics_.clear();
-    ROS_INFO("%d", args[0].size());
-    ROS_INFO("%d", result.size());
-    ROS_INFO("%d", payload.size());
+//    ROS_INFO("%d", args[0].size());
+//    ROS_INFO("%d", result.size());
+//    ROS_INFO("%d", payload.size());
 
 //    ROS_INFO("%s", (string(args[0][0])).c_str());
 //    ROS_INFO("%s", (string(payload[0][0])).c_str());
@@ -96,10 +103,10 @@ bool Client::getPublishedTopics(){
     return true;
 }
 
-  void Client::MyCallBack(const ambf_msgs::ObjectState::ConstPtr& msg)
-  {
-      ROS_INFO("%f", msg->mass);
-  }
+//  void Client::MyCallBack(const ambf_msgs::ObjectState::ConstPtr& msg)
+//  {
+//      ROS_INFO("%f", msg->mass);
+//  }
 
 
 

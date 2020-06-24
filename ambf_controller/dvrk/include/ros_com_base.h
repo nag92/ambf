@@ -9,7 +9,8 @@
 #include <ros/duration.h>
 #include "watch_dog.h"
 
-template <class T_state, class T_cmd>
+//template <class T_state, class T_cmd>
+template <class T_cmd, class T_state>
 class RosComBaseClient{
 public:
     RosComBaseClient(std::string a_name, std::string a_namespace, int a_freq_min, int a_freq_max, double time_out)
@@ -17,9 +18,9 @@ public:
         m_name = a_name;
         m_namespace = a_namespace;
 
-        int argc = 0;
-        char **argv = 0;
-        ros::init(argc, argv, "ambf_client");
+//        int argc = 0;
+//        char **argv = 0;
+//        ros::init(argc, argv, "ambf_client");
         nodePtr.reset(new ros::NodeHandle);
         aspinPtr.reset(new ros::AsyncSpinner(1));
         nodePtr->setCallbackQueue(&m_custom_queue);
@@ -41,6 +42,8 @@ protected:
 
     tf::Transform m_trans;
     T_state m_State;
+    T_cmd m_StatePrev;
+
     T_cmd m_Cmd;
     T_cmd m_CmdPrev;
 
@@ -50,10 +53,28 @@ protected:
     virtual void reset_cmd() = 0;
 };
 
-template<class T_state, class T_cmd>
-void RosComBaseClient<T_state, T_cmd>::run_publishers(){
+//template<class T_state, class T_cmd>
+template <class T_cmd, class T_state>
+
+
+//void RosComBaseClient<T_cmd, T_state>::run_publishers(){
+//    while(nodePtr->ok()){
+//        m_pub.publish(m_State);
+//        m_custom_queue.callAvailable();
+//        if(m_watchDogPtr->is_wd_expired()){
+//            m_watchDogPtr->consolePrint(m_name);
+//            reset_cmd();
+//        }
+//        m_watchDogPtr->m_ratePtr->sleep();
+//    }
+//}
+
+
+
+//void RosComBaseClient<T_state, T_cmd>::run_publishers(){
+void RosComBaseClient<T_cmd, T_state>::run_publishers(){
     while(nodePtr->ok()){
-        m_pub.publish(m_State);
+        m_pub.publish(m_Cmd);
         m_custom_queue.callAvailable();
         if(m_watchDogPtr->is_wd_expired()){
             m_watchDogPtr->consolePrint(m_name);

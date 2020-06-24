@@ -11,7 +11,8 @@ template<>
 ///
 /// \brief RosComBase::cleanUp
 ///
-void RosComBaseClient<ambf_msgs::ObjectState, ambf_msgs::ObjectCmd>::cleanUp(){
+//void RosComBaseClient<ambf_msgs::ObjectState, ambf_msgs::ObjectCmd>::cleanUp(){
+void RosComBaseClient<ambf_msgs::ObjectCmd, ambf_msgs::ObjectState>::cleanUp(){
     m_pub.shutdown();
     m_sub.shutdown();
 }
@@ -20,7 +21,8 @@ template<>
 ///
 /// \brief RosComBase::cleanUp
 ///
-void RosComBaseClient<ambf_msgs::WorldState, ambf_msgs::WorldCmd>::cleanUp(){
+//void RosComBaseClient<ambf_msgs::WorldState, ambf_msgs::WorldCmd>::cleanUp(){
+void RosComBaseClient<ambf_msgs::WorldCmd, ambf_msgs::WorldState>::cleanUp(){
     m_pub.shutdown();
     m_sub.shutdown();
 }
