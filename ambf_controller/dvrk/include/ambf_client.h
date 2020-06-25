@@ -23,9 +23,13 @@ private:
     map<string, string> objects_dict_;
     float rate_ = 1000;
     string world_name_ = "";
-    string common_obj_namespace_ = "";
+    string a_namespace_ = "/ambf/env/"; //This needs to be fixed, should not be hardcoded
     string client_name_ = "";
     string world_handle_ = "";
+    int a_freq_min_ = 50;
+    int a_freq_max_ = 100;
+    double time_out_ = 10.0;
+
 //    ros::master::V_TopicInfo topic_infos_;
 
     vector<string> lv_elems_;
@@ -35,6 +39,7 @@ private:
 
     bool getPublishedTopics();
     void create_objs_from_rostopics();
+    bool endsWith(const std::string& stack, const std::string& needle);
 
 //    void MyCallBack(const ambf_msgs::ObjectState::ConstPtr& msg);
 

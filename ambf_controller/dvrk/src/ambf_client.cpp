@@ -38,35 +38,41 @@ void Client::create_objs_from_rostopics()
     this->getPublishedTopics();
 
 
-
+    string trim_topic = "/State";
     for(int i = 0; i < ros_topics_.size(); i++)
     {
         string topic_name = ros_topics_[i].name;
         string msg_type = ros_topics_[i].datatype;
 
-        ROS_INFO("%s: %s", topic_name.c_str(), msg_type .c_str());
+        if(endsWith(topic_name, trim_topic)) {
+//            ROS_INFO("%s: %s", topic_name.c_str(), msg_type .c_str());
+            topic_name.erase (topic_name.begin(), topic_name.begin() + a_namespace_.length());
+            topic_name.erase (topic_name.end() - trim_topic.length(), topic_name.end());
 
-//        if(msg_type == "ambf_msgs/ObjectState") {
-
-//        }
+            if(msg_type == "ambf_msgs/WorldState") {
+                new WorldRosComClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
+            } else if (msg_type == "ambf_msgs/ObjectState") {
+                ROS_INFO("%s", topic_name.c_str());
+//                new ObjectRosComClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
+            }
+        }
     }
 
-    //    common_obj_namespace_ = "/ambf/env/"; //This needs to be fixed, should not be hardcoded
-    //    world_name_ = "World";
-        std::string a_name_world = "/World/";
-        std::string a_name_object = "/Object/";
-        std::string a_name_psm_base = "/psm/baselink/";
-    //    std::string a_name_object = "/World/";
 
-        std::string a_namespace = "/ambf/env/";
-        int a_freq_min = 50;
-        int a_freq_max = 100;
-        double time_out = 10.0;
 
-        WorldRosComClient wrc1(a_name_world, a_namespace, a_freq_min, a_freq_max, time_out);
+//        std::string a_name_world = "/World/";
+//        std::string a_name_object = "/Object/";
+//        std::string a_name_psm_base = "/psm/baselink/";
 
-        ObjectRosComClient orc1(a_name_object, a_namespace, a_freq_min, a_freq_max, time_out);
-        ObjectRosComClient occb(a_name_psm_base, a_namespace, a_freq_min, a_freq_max, time_out);
+//        std::string a_namespace = "/ambf/env/";
+
+//        WorldRosComClient wrc1(a_name_world, a_namespace, a_freq_min_, a_freq_max_, time_out_);
+
+//        ObjectRosComClient orc1(a_name_object, a_namespace, a_freq_min_, a_freq_max_, time_out_);
+//        ObjectRosComClient occb(a_name_psm_base, a_namespace, a_freq_min_, a_freq_max_, time_out_);
+//        new WorldRosComClient (a_name_world, a_namespace, a_freq_min_, a_freq_max_, time_out_);
+//        new ObjectRosComClient (a_name_psm_base, a_namespace, a_freq_min_, a_freq_max_, time_out_);
+
 
         sleep(10000);
 
@@ -109,6 +115,9 @@ bool Client::getPublishedTopics(){
 //  }
 
 
+bool Client::endsWith(const std::string& stack, const std::string& needle) {
+    return stack.find(needle, stack.size() - needle.size()) != std::string::npos;
+}
 
 Client::~Client(void){}
 
