@@ -19,7 +19,8 @@ protected:
     int m_num_skip_steps;
     int m_skip_steps_ctr;
     virtual void reset_cmd();
-    void sub_cb(ambf_msgs::WorldCmdConstPtr msg);
+//    void sub_cb(ambf_msgs::WorldCmdConstPtr msg);
+    void sub_cb(ambf_msgs::WorldStateConstPtr msg);
 
 };
 

@@ -29,18 +29,34 @@ void WorldRosComClient::reset_cmd(){
     m_stepSim = true;
 }
 
-void WorldRosComClient::sub_cb(ambf_msgs::WorldCmdConstPtr msg){
-    m_CmdPrev = m_Cmd;
-    m_Cmd = *msg;
-    m_num_skip_steps = m_Cmd.n_skip_steps;
-    m_enableSimThrottle = (bool)m_Cmd.enable_step_throttling;
-    if (m_enableSimThrottle){
-        if(!m_stepSim){
-            m_stepSim = (bool)m_Cmd.step_clock ^ (bool)m_CmdPrev.step_clock;
-        }
-    }
-    else{
-            m_stepSim = true;
-    }
+//void WorldRosComClient::sub_cb(ambf_msgs::WorldCmdConstPtr msg){
+//    m_CmdPrev = m_Cmd;
+//    m_Cmd = *msg;
+//    m_num_skip_steps = m_Cmd.n_skip_steps;
+//    m_enableSimThrottle = (bool)m_Cmd.enable_step_throttling;
+//    if (m_enableSimThrottle){
+//        if(!m_stepSim){
+//            m_stepSim = (bool)m_Cmd.step_clock ^ (bool)m_CmdPrev.step_clock;
+//        }
+//    }
+//    else{
+//            m_stepSim = true;
+//    }
+//    m_watchDogPtr->acknowledge_wd();
+//}
+
+void WorldRosComClient::sub_cb(ambf_msgs::WorldStateConstPtr msg){
+    m_StatePrev = m_State;
+    m_State = *msg;
+//    m_num_skip_steps = m_State.n_skip_steps;
+//    m_enableSimThrottle = (bool)m_Cmd.enable_step_throttling;
+//    if (m_enableSimThrottle){
+//        if(!m_stepSim){
+//            m_stepSim = (bool)m_Cmd.step_clock ^ (bool)m_CmdPrev.step_clock;
+//        }
+//    }
+//    else{
+//            m_stepSim = true;
+//    }
     m_watchDogPtr->acknowledge_wd();
 }

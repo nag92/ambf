@@ -53,6 +53,7 @@ void Client::create_objs_from_rostopics()
                 new WorldRosComClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
             } else if (msg_type == "ambf_msgs/ObjectState") {
                 ROS_INFO("%s", topic_name.c_str());
+                objects_map_[topic_name.c_str()] =  new ObjectRosComClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
 //                new ObjectRosComClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
             }
         }
@@ -69,12 +70,14 @@ void Client::create_objs_from_rostopics()
 //        WorldRosComClient wrc1(a_name_world, a_namespace, a_freq_min_, a_freq_max_, time_out_);
 
 //        ObjectRosComClient orc1(a_name_object, a_namespace, a_freq_min_, a_freq_max_, time_out_);
-//        ObjectRosComClient occb(a_name_psm_base, a_namespace, a_freq_min_, a_freq_max_, time_out_);
+//        ObjectRosComClient occb = new ObjectRosComClient(a_name_psm_base, a_namespace, a_freq_min_, a_freq_max_, time_out_);
+//        ObjectRosComClient *d1 = new ObjectRosComClient(a_name_psm_base, a_namespace, a_freq_min_, a_freq_max_, time_out_);
 //        new WorldRosComClient (a_name_world, a_namespace, a_freq_min_, a_freq_max_, time_out_);
 //        new ObjectRosComClient (a_name_psm_base, a_namespace, a_freq_min_, a_freq_max_, time_out_);
 
-
-        sleep(10000);
+//    objects_map_[a_name_psm_base] = d1;
+//      objects_map_[a_name_psm_base] =  new ObjectRosComClient(a_name_psm_base, a_namespace, a_freq_min_, a_freq_max_, time_out_);
+//    delete d1;
 
 
 
@@ -120,5 +123,3 @@ bool Client::endsWith(const std::string& stack, const std::string& needle) {
 }
 
 Client::~Client(void){}
-
-

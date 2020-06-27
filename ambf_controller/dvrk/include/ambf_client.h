@@ -9,6 +9,7 @@
 #include<ambf_msgs/ObjectState.h>
 #include<ambf_msgs/WorldCmd.h>
 #include<ambf_msgs/WorldState.h>
+#include <unordered_map>
 
 #include "ambf_world.h"
 #include "ambf_object.h"
@@ -20,12 +21,14 @@ class Client
 private:
     ros::master::V_TopicInfo ros_topics_;
     vector<string> sub_list_;
-    map<string, string> objects_dict_;
+//    std::unordered_map<string, ObjectRosComClient> objects_map_;
+    std::unordered_map<string, ObjectRosComClient *> objects_map_;
     float rate_ = 1000;
     string world_name_ = "";
     string a_namespace_ = "/ambf/env/"; //This needs to be fixed, should not be hardcoded
     string client_name_ = "";
     string world_handle_ = "";
+
     int a_freq_min_ = 50;
     int a_freq_max_ = 100;
     double time_out_ = 10.0;
@@ -65,6 +68,7 @@ public:
 //    Client(ros::NodeHandle *nh);
     Client();
     ~Client(void);
+
 };
 
 #endif // AMBF_CLIENT_H

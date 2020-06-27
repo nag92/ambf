@@ -15,6 +15,7 @@ class RosComBaseClient{
 public:
     RosComBaseClient(std::string a_name, std::string a_namespace, int a_freq_min, int a_freq_max, double time_out)
     {
+
         m_name = a_name;
         m_namespace = a_namespace;
 
@@ -30,6 +31,9 @@ public:
     virtual void run_publishers();
     virtual void cleanUp();
 
+//    constexpr RosComBaseClient(const RosComBaseClient &) = delete;
+        constexpr RosComBaseClient(const RosComBaseClient &);
+
 protected:
     boost::shared_ptr<ros::NodeHandle> nodePtr;
     boost::shared_ptr<ros::AsyncSpinner> aspinPtr;
@@ -42,7 +46,7 @@ protected:
 
     tf::Transform m_trans;
     T_state m_State;
-    T_cmd m_StatePrev;
+    T_state m_StatePrev;
 
     T_cmd m_Cmd;
     T_cmd m_CmdPrev;

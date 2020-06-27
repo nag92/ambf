@@ -40,7 +40,12 @@ void ObjectRosComClient::reset_cmd(){
     }
 }
 
-void ObjectRosComClient::sub_cb(ambf_msgs::ObjectCmdConstPtr msg){
-    m_Cmd = *msg;
+//void ObjectRosComClient::sub_cb(ambf_msgs::ObjectCmdConstPtr msg){
+//    m_Cmd = *msg;
+//    m_watchDogPtr->acknowledge_wd();
+//}
+
+void ObjectRosComClient::sub_cb(ambf_msgs::ObjectStateConstPtr msg){
+    m_State = *msg;
     m_watchDogPtr->acknowledge_wd();
 }
