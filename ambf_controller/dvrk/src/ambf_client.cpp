@@ -3,8 +3,12 @@
 //Client::Client(ros::NodeHandle *nh)
 Client::Client()
 {
+    int argc = 0;
+    char **argv = 0;
+    ros::init(argc, argv, "ambf_client");
 
-    this->create_objs_from_rostopics();
+
+
 
 
 
@@ -31,6 +35,12 @@ Client::Client()
 //    ROS_INFO("%d", v_topic_info_.size());
 
 //    sub_ = nh->subscribe("/ambf/env/psm/baselink/State", 1000, &Client::MyCallBack, this);
+
+}
+
+void Client::connect() {
+    this->create_objs_from_rostopics();
+//    ros::spin();
 }
 
 void Client::create_objs_from_rostopics()
@@ -50,7 +60,7 @@ void Client::create_objs_from_rostopics()
             topic_name.erase (topic_name.end() - trim_topic.length(), topic_name.end());
 
             if(msg_type == "ambf_msgs/WorldState") {
-                new WorldRosComClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
+                world_handle_ = new WorldRosComClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
             } else if (msg_type == "ambf_msgs/ObjectState") {
                 ROS_INFO("%s", topic_name.c_str());
                 objects_map_[topic_name.c_str()] =  new ObjectRosComClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
@@ -120,6 +130,66 @@ bool Client::getPublishedTopics(){
 
 bool Client::endsWith(const std::string& stack, const std::string& needle) {
     return stack.find(needle, stack.size() - needle.size()) != std::string::npos;
+}
+
+
+string Client::get_common_namespace() {
+    return a_namespace_;
+}
+
+WorldRosComClient* Client::get_world_handle() {
+    return world_handle_;
+}
+
+
+vector<string> Client::get_obj_names() {
+    vector<string> object_names;
+    std::transform (objects_map_.begin(), objects_map_.end(),back_inserter(object_names), [] (std::pair<string, ObjectRosComClient *> const & pair)
+    {
+
+    return pair.first;
+
+    });
+
+    return object_names;
+}
+
+ObjectRosComClient* Client::get_obj_handle(string a_name) {
+    if(objects_map_.find(a_name) == objects_map_.end()) {
+        // Object Name does not exist
+//        cout << a_name << " NAMED OBJECT NOT FOUND";
+        return NULL;
+    }
+
+    return objects_map_[a_name];
+}
+
+void Client::get_obj_pose(string a_name) {
+//    ObjectRosComClient* object_handler = this->get_obj_handle(a_name);
+
+//    double px = object_handler->m_State.pose.position.x;
+//    double py = object_handler->m_State.pose.position.y;
+//    double pz = object_handler->m_State.pose.position.z;
+
+
+}
+
+void Client::clean_up() {
+//    ros::spin();
+
+    world_handle_->~WorldRosComClient();
+
+
+    for(std::unordered_map<string, ObjectRosComClient *>::iterator it = objects_map_.begin(); it != objects_map_.end(); ++it) {
+        cout << "Closing publisher for: " << it->first << "\n";
+        it->second->~ObjectRosComClient();
+    }
+
+
+//    for(string obj_name : objects_names) {
+//        (objects_map_[obj_name])->~ObjectRosComClient();
+//    cout << "Closing publisher for: " << obj_name << "\n";
+//    }
 }
 
 Client::~Client(void){}

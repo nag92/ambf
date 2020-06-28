@@ -172,6 +172,8 @@ class Client:
 
     def get_obj_pose(self, a_name):
         obj = self._objects_dict.get(a_name)
+
+        print(type(obj))
         if obj is not None:
             return obj.pose
         else:
