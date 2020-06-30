@@ -9,9 +9,6 @@ void ObjectRosComClient::init(){
     m_State.name.data = m_name;
     m_State.sim_step = 0;
 
-//    m_pub = nodePtr->advertise<ambf_msgs::ObjectState>("/" + m_namespace + "/" + m_name + "/State", 10);
-//    m_sub = nodePtr->subscribe("/" + m_namespace + "/" + m_name + "/Command", 10, &ObjectRosComClient::sub_cb, this);
-
     m_pub = nodePtr->advertise<ambf_msgs::ObjectCmd>("/" + m_namespace + "/" + m_name + "/Command", 10);
     m_sub = nodePtr->subscribe("/" + m_namespace + "/" + m_name + "/State", 10, &ObjectRosComClient::sub_cb, this);
 

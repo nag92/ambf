@@ -57,7 +57,6 @@ protected:
     virtual void reset_cmd() = 0;
 };
 
-//template<class T_state, class T_cmd>
 template <class T_cmd, class T_state>
 
 
@@ -74,8 +73,6 @@ template <class T_cmd, class T_state>
 //}
 
 
-
-//void RosComBaseClient<T_state, T_cmd>::run_publishers(){
 void RosComBaseClient<T_cmd, T_state>::run_publishers(){
     while(nodePtr->ok()){
         m_pub.publish(m_Cmd);

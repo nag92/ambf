@@ -9,14 +9,46 @@ void WorldRosComClient::init(){
     m_enableSimThrottle = false;
     m_stepSim = true;
 
-//    m_pub = nodePtr->advertise<ambf_msgs::WorldState>("/" + m_namespace + "/" + m_name + "/State", 10);
-//    m_sub = nodePtr->subscribe("/" + m_namespace + "/" + m_name + "/Command", 10, &WorldRosComClient::sub_cb, this);
-
     m_pub = nodePtr->advertise<ambf_msgs::WorldCmd>("/" + m_namespace + "/" + m_name + "/Command", 10);
     m_sub = nodePtr->subscribe("/" + m_namespace + "/" + m_name + "/State", 10, &WorldRosComClient::sub_cb, this);
 
     m_thread = boost::thread(boost::bind(&WorldRosComClient::run_publishers, this));
     std::cerr << "Thread Joined: " << m_name << std::endl;
+}
+
+void WorldRosComClient::enable_throttling(bool flag) {
+    m_Cmd.enable_step_throttling = flag;
+}
+
+void WorldRosComClient::set_num_step_skips(int n) {
+
+    if ( n <= 0 || n >= 100 ) {
+        throw std::invalid_argument( "received invalid value" );
+        return;
+    }
+    m_Cmd.n_skip_steps = n;
+}
+
+void WorldRosComClient::ros_cb(ambf_msgs::WorldStateConstPtr msg) {
+    m_State = *msg;
+}
+
+void WorldRosComClient::update(){
+    m_Cmd.step_clock = !m_Cmd.step_clock;
+    m_pub.publish(m_Cmd);
+    m_watchDogPtr->acknowledge_wd();
+}
+
+void WorldRosComClient::clear_cmd(){
+    m_Cmd.enable_step_throttling = false;
+}
+
+void WorldRosComClient::set_name(string name) {
+    m_name = name;
+}
+
+string WorldRosComClient::get_name() {
+    return m_name;
 }
 
 WorldRosComClient::~WorldRosComClient(){

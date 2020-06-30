@@ -65,7 +65,6 @@ add_executable (ambf_client     dvrk/include/ros_com_base.h
                                 dvrk/include/ambf_world.h
                                 dvrk/include/watch_dog.h
 
-
                                 dvrk/src/ros_com_base.cpp
 
                                 dvrk/src/ambf_client.cpp
