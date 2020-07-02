@@ -16,37 +16,30 @@
 #include "ambf_object.h"
 
 using namespace std;
-
+using namespace ambf_client;
 
 class Client
 {
 private:
     ros::master::V_TopicInfo ros_topics_;
     vector<string> sub_list_;
-    std::unordered_map<string, ObjectRosComClient *> objects_map_;
+    std::unordered_map<string, ObjectClient *> objects_map_;
     float rate_ = 1000;
     string world_name_ = "";
     string a_namespace_ = "/ambf/env/"; //This needs to be fixed, should not be hardcoded
     string client_name_ = "";
-//    string world_handle_* = "";
-    WorldRosComClient *world_handle_ = NULL;
+    WorldClient *world_handle_ = NULL;
 
     int a_freq_min_ = 50;
     int a_freq_max_ = 100;
     double time_out_ = 10.0;
 
-//    ros::master::V_TopicInfo topic_infos_;
-
     vector<string> lv_elems_;
-//    char lc_delim_[2];
     ros::Subscriber sub_;
 
 
     bool getPublishedTopics();
-
     bool endsWith(const std::string& stack, const std::string& needle);
-
-//    void MyCallBack(const ambf_msgs::ObjectState::ConstPtr& msg);
 
 
     void refresh();
@@ -57,13 +50,13 @@ private:
 
 
 public:
-//    Client(ros::NodeHandle *nh);
     Client();
     void connect();
     void create_objs_from_rostopics();
-    WorldRosComClient* get_world_handle();
+//    WorldRosComClient* get_world_handle();
+    WorldClient* get_world_handle();
     vector<string> get_obj_names();
-    ObjectRosComClient* get_obj_handle(string a_name);
+    ObjectClient* get_obj_handle(string a_name);
     void get_obj_pose(string a_name);
 
 
@@ -76,16 +69,5 @@ public:
     ~Client(void);
 
 };
-
-
-
-//template <typename M, typename V>
-
-//void MapToVec( const  M & m, V & v ) {
-//    for( typename M::const_iterator it = m.begin(); it != m.end(); ++it ) {
-//        v.push_back( it->second );
-//    }
-//}
-
 
 #endif // AMBF_CLIENT_H

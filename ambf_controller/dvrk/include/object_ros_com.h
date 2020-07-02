@@ -13,6 +13,8 @@ public:
 
     ~ObjectRosComClient();
     virtual void init();
+    void ros_cb(ambf_msgs::ObjectStateConstPtr msg);
+    bool is_active();
 
 protected:
     virtual void reset_cmd();

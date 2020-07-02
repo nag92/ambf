@@ -1,6 +1,5 @@
 #include "ambf_client.h"
 
-//Client::Client(ros::NodeHandle *nh)
 Client::Client()
 {
     int argc = 0;
@@ -28,10 +27,11 @@ void Client::create_objs_from_rostopics()
             topic_name.erase (topic_name.end() - trim_topic.length(), topic_name.end());
 
             if(msg_type == "ambf_msgs/WorldState") {
-                world_handle_ = new WorldRosComClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
+                world_handle_ = new WorldClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
             } else if (msg_type == "ambf_msgs/ObjectState") {
                 ROS_INFO("%s", topic_name.c_str());
-                objects_map_[topic_name.c_str()] =  new ObjectRosComClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
+                objects_map_[topic_name.c_str()] =  new ObjectClient(topic_name, a_namespace_, a_freq_min_, a_freq_max_, time_out_);
+
             }
         }
     }
@@ -64,14 +64,14 @@ string Client::get_common_namespace() {
     return a_namespace_;
 }
 
-WorldRosComClient* Client::get_world_handle() {
+WorldClient* Client::get_world_handle() {
     return world_handle_;
 }
 
 
 vector<string> Client::get_obj_names() {
     vector<string> object_names;
-    std::transform (objects_map_.begin(), objects_map_.end(),back_inserter(object_names), [] (std::pair<string, ObjectRosComClient *> const & pair)
+    std::transform (objects_map_.begin(), objects_map_.end(),back_inserter(object_names), [] (std::pair<string, ObjectClient *> const & pair)
     {
 
     return pair.first;
@@ -81,7 +81,7 @@ vector<string> Client::get_obj_names() {
     return object_names;
 }
 
-ObjectRosComClient* Client::get_obj_handle(string a_name) {
+ObjectClient* Client::get_obj_handle(string a_name) {
     if(objects_map_.find(a_name) == objects_map_.end()) {
         // Object Name does not exist
 //        cout << a_name << " NAMED OBJECT NOT FOUND";
@@ -104,11 +104,11 @@ void Client::get_obj_pose(string a_name) {
 void Client::clean_up() {
 //    ros::spin();
 
-    world_handle_->~WorldRosComClient();
+    world_handle_->~WorldClient();
 
-    for(std::unordered_map<string, ObjectRosComClient *>::iterator it = objects_map_.begin(); it != objects_map_.end(); ++it) {
+    for(std::unordered_map<string, ObjectClient *>::iterator it = objects_map_.begin(); it != objects_map_.end(); ++it) {
         cout << "Closing publisher for: " << it->first << "\n";
-        it->second->~ObjectRosComClient();
+        it->second->~ObjectClient();
     }
 }
 

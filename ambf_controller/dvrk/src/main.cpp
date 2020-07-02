@@ -22,7 +22,11 @@ int main(int argc, char* argv[])
         cout << "obj: " << obj << "\n";
     }
 
-    ObjectRosComClient* psm_baselink_handle = client.get_obj_handle("psm/baselink");
+    ObjectClient* psm_baselink_handle = client.get_obj_handle("psm/baselink");
+    tf::Vector3 pose = psm_baselink_handle->get_pos();
+
+    ROS_INFO("%f", pose[0]);
+
     client.clean_up();
     return 0;
 }

@@ -13,12 +13,14 @@ print('\n\n----')
 # input("We can see what objects the client has found. Press Enter to continue...")
 # You can print the names of objects found. We should see all the links found
 print(_client.get_obj_names())
-_client.get_obj_pose('psm/baselink')
+# _client.get_obj_pose('psm/baselink')
 
 # ## Lets get a handle to PSM and ECM, as we can see in the printed
 # ## object names, 'ecm/baselink' and 'psm/baselink' should exist
 # #ecm_handle = _client.get_obj_handle('ecm/baselink')
 psm_handle = _client.get_obj_handle('psm/baselink')
+print(psm_handle.get_pos())
+
 # print(_client.get_obj_pose('psm/baselink'))
 # ## Similarly we can get a handle to any link lower in the hierarchy rather
 # ## than the root link. Let's get a handle to MTMs wrist platform link
@@ -90,7 +92,7 @@ psm_handle = _client.get_obj_handle('psm/baselink')
 # #for i in range(0, 500):
 # #    mtm_wrist_handle.set_torque(0, 3, 0) # Set 10 Nm in the World Y axis
 # #    time.sleep(0.01) # Run the loop for 10 seconds
-
+# time.sleep(100000)
 print('\n\n----')
 # input("Let's clean up. Press Enter to continue...")
 ## Lastly to cleanup

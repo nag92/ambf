@@ -6,6 +6,14 @@ namespace ambf_client{
       m_objectCommandClient.enable_position_controller = false;
     }
 
+    tf::Vector3 ObjectClient::get_pos() {
+        double px = m_State.pose.position.x;
+        double py = m_State.pose.position.y;
+        double pz = m_State.pose.position.z;
+        tf::Vector3 v3 = tf::Vector3(px, py, pz);
+    }
+
+
     void ObjectClient::cur_position(double px, double py, double pz){
         m_trans.setOrigin(tf::Vector3(px, py, pz));
         m_State.pose.position.x = px;
@@ -74,6 +82,7 @@ namespace ambf_client{
         }
         m_State.joint_positions = joint_positions;
     }
+
 
     extern "C"{
         ObjectClient* create_object(std::string a_name, std::string a_namespace="/ambf_client/", int a_min_freq=50, int a_max_freq=1000, double time_out=0.5){
