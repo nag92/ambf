@@ -33,17 +33,19 @@
 #  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
 #
-#  $Author: Melody Su $
+#  $Author: Adnan Munawar, Melody Su, Nathaniel Goldfarb, Shreyas Chandra Sekhar$$
 #  $Date:  April, 2019 $
-#  $Rev:  $
-
+#  $Rev: 1.0$
 
 # common settings required to build examples
 find_package (GLFW REQUIRED)
 find_package (Boost COMPONENTS program_options filesystem REQUIRED)
 
 include_directories (${GLFW_INCLUDE_DIRS}
-                     raven2/include )
+                     raven2/include 
+		             ambf_client/include
+		             
+)
 
 add_executable (ambf_controller raven2/include/ambf_defines.h
                                 raven2/include/ambf_controller.h
@@ -53,4 +55,9 @@ add_executable (ambf_controller raven2/include/ambf_defines.h
                                 raven2/src/ambf_defines.cpp
                                 raven2/src/main.cpp )
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dvrk)
+
 target_link_libraries (ambf_controller ${AMBF_LIBRARIES} ${GLFW_LIBRARIES} ${Boost_LIBRARIES})
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ambf_client)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ambf_client_app)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ambf_client_test)

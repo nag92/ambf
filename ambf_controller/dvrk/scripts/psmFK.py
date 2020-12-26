@@ -45,6 +45,9 @@ def compute_FK(joint_pos):
     T_6_5 = link6.get_trans()
     T_7_6 = link7.get_trans()
 
+    # print("\nT_4_3: ")
+    # print(T_4_3)
+
     T_2_0 = np.matmul(T_1_0, T_2_1)
     T_3_0 = np.matmul(T_2_0, T_3_2)
     T_4_0 = np.matmul(T_3_0, T_4_3)
@@ -74,6 +77,41 @@ def compute_FK(joint_pos):
 
     elif len(joint_pos) == 7:
         return T_7_0
+
+
+class DH:
+    def __init__(self, alpha, a, theta, d, offset, joint_type):
+        self.alpha = alpha
+        self.a = a
+        self.theta = theta
+        self.d = d
+        self.offset = offset
+        self.joint_type = joint_type
+
+    def mat_from_dh(self, alpha, a, theta, d, offset):
+
+        ca = np.cos(alpha)
+        sa = np.sin(alpha)
+        if self.joint_type == 'R':
+            theta = theta + offset
+        elif self.joint_type == 'P':
+            d = d + offset
+        else:
+            assert type == 'P' and type == 'R'
+
+        ct = np.cos(theta)
+        st = np.sin(theta)
+
+        mat = np.mat([
+            [ct     , -st     ,  0 ,  a],
+            [st * ca,  ct * ca, -sa, -d * sa],
+            [st * sa,  ct * sa,  ca,  d * ca],
+            [0      ,  0      ,  0 ,  1]
+        ])
+        return mat
+
+    def get_trans(self):
+        return self.mat_from_dh(self.alpha, self.a, self.theta, self.d, self.offset)
 
 
 # T_7_0 = compute_FK([-0.5, 0, 0.2, 0, 0, 0])

@@ -1,6 +1,10 @@
 # Asynchronous Multi-Body Framework (AMBF)
 ### 1. Author: [Adnan Munawar](https://github.com/adnanmunawar) (amunawar@wpi.edu)
 
+#### Build Status  
+
+![ambf-1.0](https://github.com/WPI-AIM/ambf/workflows/ambf-1.0/badge.svg?branch=ambf-1.0)
+
 #### Contributors:
 1. [Melody Su](https://github.com/melodysu83) (Email: --)
 
@@ -30,6 +34,9 @@ On Linux machines, you might need to install the `libasound2-dev` package and ex
 
 ```
 sudo apt install libasound2-dev libgl1-mesa-dev xorg-dev
+sudo apt install libgtest-dev
+cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make
+sudo cp libgtest.a libgtest_main.a /usr/lib
 ```
 
 Boost libraires ship with Ubuntu systems, but on Mac OS, you might need to install them explicitly.
@@ -222,6 +229,19 @@ In order to subscribe and publish data using AMBF over multiple machines, the fo
 5. If you face any firewall issues or if you are unable to receive/publish any ROS topics over the two machines, follow the next step.
 6. Open a terminal and type the command:  `sudo apt-get install gufw`
 7. Next type `sudo gufw` (type the password when prompted) and ensure both the Incoming and Outgoing traffic is allowed.
+
+### 8 Docker
+In order to use the docker file, follow the instructions [here](https://docs.docker.com/install/) to install docker on your system. To run the file:  
+
+```bash
+cd ~/
+git clone https://github.com/WPI-AIM/ambf.git && cd ambf
+sudo service docker start
+docker build --rm -f "Dockerfile" -t ambf:latest "."
+docker run --rm -it  ambf:latest
+cd /ambf/bin/lin-x86_64/
+./ambf_simulator -g off
+```
 
 ## Citation
 If this work is helpful for your research, please use the following reference for citation:

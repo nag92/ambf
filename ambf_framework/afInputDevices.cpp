@@ -317,6 +317,14 @@ bool afPhysicalDevice::loadPhysicalDevice(YAML::Node *pd_node, std::string node_
                 _devFound = true;
                 break;
             }
+            else{
+                std::shared_ptr<cGenericHapticDevice> gHD;
+                if (hDevHandler->getDevice(gHD, dIdx)){
+                    // Workaround for proper cleanup
+                    gHD->open();
+                    gHD->close();
+                }
+            }
         }
     }
 
@@ -372,6 +380,7 @@ bool afPhysicalDevice::loadPhysicalDevice(YAML::Node *pd_node, std::string node_
 
     if (_simulatedMBDefined){
         if (!simDevice->loadMultiBody(_simulatedMBConfig, false)){
+            m_hDevice->close();
             return 0;
         }
         boost::filesystem::path p(_simulatedMBConfig);
@@ -386,14 +395,13 @@ bool afPhysicalDevice::loadPhysicalDevice(YAML::Node *pd_node, std::string node_
             simDevice->m_rootLink = simDevice->getRootAFRigidBodyLocal();
         }
     }
-    // If only root link is defined, we are going to look for it in the global space
+    // If only the root link is defined, we are going to look for it in the global space
     else if (_rootLinkDefined){
         if (a_iD->getAFWorld()->getAFRigidBody(_rootLinkName, false)){
             simDevice->m_rootLink = a_iD->getAFWorld()->getAFRigidBody(_rootLinkName);
         }
     }
 
-    // If we cannot find any root link, return failure
     if (simDevice->m_rootLink){
         // Now check if the controller gains have been defined. If so, override the controller gains
         // defined for the rootlink of simulate end effector
@@ -481,6 +489,7 @@ bool afPhysicalDevice::loadPhysicalDevice(YAML::Node *pd_node, std::string node_
         }
     }
     else{
+        m_hDevice->close();
         return 0;
     }
 
@@ -982,7 +991,7 @@ void afSimulatedDevice::clearWrench(){
 /// \param a_afWorld
 ///
 afCollateralControlManager::afCollateralControlManager(afWorldPtr a_afWorld){
-    m_deviceHandler = NULL;
+    m_deviceHandler = nullptr;
     m_afWorld = a_afWorld;
 
     m_use_cam_frame_rot = true;
@@ -995,6 +1004,14 @@ afCollateralControlManager::afCollateralControlManager(afWorldPtr a_afWorld){
 /// \brief afInputDevices::~afInputDevices
 ///
 afCollateralControlManager::~afCollateralControlManager(){
+    for (int i = 0 ; i < m_collateralControlUnits.size() ; i++){
+        if (m_collateralControlUnits[i].m_physicalDevicePtr != nullptr){
+            delete m_collateralControlUnits[i].m_physicalDevicePtr;
+        }
+        if (m_collateralControlUnits[i].m_simulatedDevicePtr != nullptr){
+            delete m_collateralControlUnits[i].m_simulatedDevicePtr;
+        }
+    }
 }
 
 
@@ -1077,58 +1094,11 @@ bool afCollateralControlManager::pairCamerasToCCU(afCollateralControlUnit& a_ccu
 /// \return
 ///
 bool afCollateralControlManager::loadInputDevices(std::string a_input_devices_config, int a_max_load_devs){
-    if (a_input_devices_config.empty()){
-        a_input_devices_config = m_afWorld->getInputDevicesConfig();
+    std::vector<int> devIdxes;
+    for (int i = 0 ; i < a_max_load_devs ; i++){
+        devIdxes.push_back(i);
     }
-    YAML::Node inputDevicesNode;
-    try{
-        inputDevicesNode = YAML::LoadFile(a_input_devices_config);
-    }catch (std::exception &e){
-        std::cerr << "[Exception]: " << e.what() << std::endl;
-        std::cerr << "ERROR! FAILED TO LOAD CONFIG FILE: " << a_input_devices_config << std::endl;
-        return 0;
-    }
-
-    YAML::Node inputDevices = inputDevicesNode["input devices"];
-
-    m_basePath = boost::filesystem::path(a_input_devices_config).parent_path();
-
-    if (!inputDevices.IsDefined()){
-        return 0;
-    }
-
-    if (a_max_load_devs > 0){
-        m_deviceHandler.reset(new cHapticDeviceHandler());
-        a_max_load_devs = a_max_load_devs < inputDevices.size() ? a_max_load_devs : inputDevices.size();
-        //        std::cerr << "Num of devices " << m_num_devices << std::endl;
-        for (uint devIdx = 0; devIdx < a_max_load_devs; devIdx++){
-
-            afPhysicalDevice* pD = new afPhysicalDevice(m_afWorld);
-            afSimulatedDevice* sD = new afSimulatedDevice(m_afWorld);
-
-            // Load the device specified in the afInputDevice yaml file
-            std::string devKey = inputDevices[devIdx].as<std::string>();
-            YAML::Node devNode = inputDevicesNode[devKey];
-
-            if (pD->loadPhysicalDevice(&devNode, devKey, m_deviceHandler.get(), sD, this)){
-                afCollateralControlUnit ccu;
-                ccu.m_physicalDevicePtr = pD;
-                ccu.m_simulatedDevicePtr = sD;
-                ccu.m_name = devKey;
-                pairCamerasToCCU(ccu);
-                m_collateralControlUnits.push_back(ccu);
-            }
-        }
-        m_numDevices = m_collateralControlUnits.size();
-    }
-    else{
-        m_numDevices = 0;
-    }
-    m_use_cam_frame_rot = true;
-    m_simModes = CAM_CLUTCH_CONTROL;
-    m_mode_str = "CAM_CLUTCH_CONTROL";
-    m_mode_idx = 0;
-    return true;
+    return loadInputDevices(a_input_devices_config, devIdxes);
 }
 
 
@@ -1159,11 +1129,12 @@ bool afCollateralControlManager::loadInputDevices(std::string a_input_devices_co
         return 0;
     }
 
-    bool success = false;
+    bool load_status = false;
 
-    if (a_device_indices.size() >= 0 && a_device_indices.size() <= inputDevices.size()){
+    int valid_dev_idxs = cMin(a_device_indices.size(), inputDevices.size());
+    if (valid_dev_idxs > 0){
         m_deviceHandler.reset(new cHapticDeviceHandler());
-        for (int i = 0; i < a_device_indices.size(); i++){
+        for (int i = 0; i < valid_dev_idxs; i++){
             int devIdx = a_device_indices[i];
             if (devIdx >=0 && devIdx < inputDevices.size()){
                 afPhysicalDevice* pD = new afPhysicalDevice(m_afWorld);
@@ -1178,31 +1149,35 @@ bool afCollateralControlManager::loadInputDevices(std::string a_input_devices_co
                     ccu.m_physicalDevicePtr = pD;
                     ccu.m_simulatedDevicePtr = sD;
                     ccu.m_name = devKey;
+                    pairCamerasToCCU(ccu);
                     m_collateralControlUnits.push_back(ccu);
-                    success = true;
+                    load_status = true;
                 }
                 else
                 {
                     std::cerr << "WARNING: FAILED TO LOAD DEVICE: \"" << devKey << "\"\n";
-                    success = false;
+                    load_status = false;
+                    delete pD;
+                    delete sD;
                 }
             }
             else{
                 std::cerr << "ERROR: DEVICE INDEX : \"" << devIdx << "\" > \"" << inputDevices.size() << "\" NO. OF DEVICE SPECIFIED IN \"" << a_input_devices_config << "\"\n";
-                success = false;
+                load_status = false;
             }
         }
     }
     else{
         std::cerr << "ERROR: SIZE OF DEVICE INDEXES : \"" << a_device_indices.size() << "\" > NO. OF DEVICE SPECIFIED IN \"" << a_input_devices_config << "\"\n";
-        success = false;
+        load_status = false;
     }
+
     m_numDevices = m_collateralControlUnits.size();
     m_use_cam_frame_rot = true;
     m_simModes = CAM_CLUTCH_CONTROL;
     m_mode_str = "CAM_CLUTCH_CONTROL";
     m_mode_idx = 0;
-    return success;
+    return load_status;
 }
 
 
