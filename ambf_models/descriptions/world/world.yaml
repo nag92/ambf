@@ -82,7 +82,7 @@ depth_camera:
   publish image interval: 1 # Publish every nth scene update
   publish depth: True
   publish depth interval: 10 # Publish every nth scene update
-  parent: /ambf/env/BODY Hip
+  parent: /ambf/env/BODY ExoHip
 
 cameraEndoscope:
   namespace: cameras/
