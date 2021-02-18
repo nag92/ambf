@@ -68,21 +68,21 @@ camera1:
 # vector are with respect to the parent and not the world origin
 
 
-depth_camera:
-  namespace: cameras/
-  name: depth_camera
-  location: {x: 0.0, y: 0.0, z: 0.0}
-  look at: {x: 0.0, y: -0.875, z: -0.125}
-  up: {x: 0.0, y: 0.0, z: 1.0}
-  clipping plane: {near: 0.1, far: 10.0}
-  field view angle: 1.0
-  monitor: 0
-  multipass: True
-  publish image: True
-  publish image interval: 1 # Publish every nth scene update
-  publish depth: True
-  publish depth interval: 10 # Publish every nth scene update
-  parent: /ambf/env/BODY Hip
+# depth_camera:
+#   namespace: cameras/
+#   name: depth_camera
+#   location: {x: 0.0, y: 0.0, z: 0.0}
+#   look at: {x: 0.0, y: -0.875, z: -0.125}
+#   up: {x: 0.0, y: 0.0, z: 1.0}
+#   clipping plane: {near: 0.1, far: 10.0}
+#   field view angle: 1.0
+#   monitor: 0
+#   multipass: True
+#   publish image: True
+#   publish image interval: 1 # Publish every nth scene update
+#   publish depth: True
+#   publish depth interval: 10 # Publish every nth scene update
+#   parent: /ambf/env/BODY ExoHip
 
 cameraEndoscope:
   namespace: cameras/

@@ -136,7 +136,6 @@ void RigidBody::set_pos(double px, double py, double pz) {
     wrench_cmd_set_ = false; // Flag to check if a Wrench command has been set
     pose_cmd_set_ = true;  // Flag to check if a Pose command has been set
     twist_cmd_set_ = false; 
-    std::cout<<"seting pos \n";
     this->set_pose(pose);
 }
 
